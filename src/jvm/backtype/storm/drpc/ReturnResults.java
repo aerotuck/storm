@@ -33,7 +33,7 @@ public class ReturnResults extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-        String result = (String) input.getValue(0);
+        byte[] result = input.getBinary(0);
         String returnInfo = (String) input.getValue(1);
         if(returnInfo!=null) {
             Map retMap = (Map) JSONValue.parse(returnInfo);
@@ -48,13 +48,13 @@ public class ReturnResults extends BaseRichBolt {
                     add(host);
                     add(port);
                 }};
-            
+
                 if(!_clients.containsKey(server)) {
                     _clients.put(server, new DRPCInvocationsClient(host, port));
                 }
                 client = _clients.get(server);
             }
-                
+
             try {
                 client.result(id, result);
                 _collector.ack(input);
@@ -63,7 +63,7 @@ public class ReturnResults extends BaseRichBolt {
                 _collector.fail(input);
             }
         }
-    }    
+    }
 
     @Override
     public void cleanup() {

@@ -51,6 +51,11 @@
         ]
     (reify DistributedRPC$Iface
       (^String execute [this ^String function ^String args]
+        (->> (.getBytes args)
+             (.executeBinary this function)
+             (String.)))
+
+      (^bytes executeBinary [this ^String function ^bytes args]
         (log-debug "Received DRPC request for " function " " args " at " (System/currentTimeMillis))
         (let [id (str (swap! ctr (fn [v] (mod (inc v) 1000000000))))
               ^Semaphore sem (Semaphore. 0)
@@ -71,7 +76,7 @@
               result
               ))))
       DistributedRPCInvocations$Iface
-      (^void result [this ^String id ^String result]
+      (^void result [this ^String id ^bytes result]
         (let [^Semaphore sem (@id->sem id)]
           (log-debug "Received result " result " for " id " at " (System/currentTimeMillis))
           (when sem
@@ -102,7 +107,7 @@
     (let [conf (read-storm-config)
           service-handler (service-handler)
           ;; requests and returns need to be on separate thread pools, since calls to
-          ;; "execute" don't unblock until other thrift methods are called. So if 
+          ;; "execute" don't unblock until other thrift methods are called. So if
           ;; 64 threads are calling execute, the server won't accept the result
           ;; invocations that will unblock those threads
           handler-server (THsHaServer. (-> (TNonblockingServerSocket. (int (conf DRPC-PORT)))
@@ -117,7 +122,7 @@
                                              (.protocolFactory (TBinaryProtocol$Factory.))
                                              (.processor (DistributedRPCInvocations$Processor. service-handler))
                                              ))]
-      
+
       (.addShutdownHook (Runtime/getRuntime) (Thread. (fn [] (.stop handler-server) (.stop invoke-server))))
       (log-message "Starting Distributed RPC servers...")
       (future (.serve invoke-server))

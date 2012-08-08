@@ -25,11 +25,11 @@ public class DRPCClient implements DistributedRPC.Iface {
             throw new RuntimeException(e);
         }
     }
-    
+
     public DRPCClient(String host, int port) {
         this(host, port, null);
     }
-    
+
     private void connect() throws TException {
         TSocket socket = new TSocket(host, port);
         if(timeout!=null) {
@@ -39,19 +39,19 @@ public class DRPCClient implements DistributedRPC.Iface {
         client = new DistributedRPC.Client(new TBinaryProtocol(conn));
         conn.open();
     }
-    
+
     public String getHost() {
         return host;
     }
-    
+
     public int getPort() {
         return port;
-    }   
-    
-    public String execute(String func, String args) throws TException, DRPCExecutionException {
+    }
+
+    public byte[] executeBinary(String func, byte[] args) throws TException, DRPCExecutionException {
         try {
             if(client==null) connect();
-            return client.execute(func, args);
+            return client.executeBinary(func, args);
         } catch(TException e) {
             client = null;
             throw e;
@@ -59,6 +59,10 @@ public class DRPCClient implements DistributedRPC.Iface {
             client = null;
             throw e;
         }
+    }
+
+    public String execute(String func, String args) throws TException, DRPCExecutionException {
+        return new String(executeBinary(func, args.getBytes()));
     }
 
     public void close() {

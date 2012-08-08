@@ -26,7 +26,7 @@ public class PrepareRequest extends BaseBasicBolt {
 
     @Override
     public void execute(Tuple tuple, BasicOutputCollector collector) {
-        String args = tuple.getString(0);
+        byte[] args = tuple.getBinary(0);
         String returnInfo = tuple.getString(1);
         long requestId = rand.nextLong();
         collector.emit(ARGS_STREAM, new Values(requestId, args));

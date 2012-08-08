@@ -12,7 +12,7 @@ public class DRPCInvocationsClient implements DistributedRPCInvocations.Iface {
     private TTransport conn;
     private DistributedRPCInvocations.Client client;
     private String host;
-    private int port;    
+    private int port;
 
     public DRPCInvocationsClient(String host, int port) {
         try {
@@ -23,22 +23,22 @@ public class DRPCInvocationsClient implements DistributedRPCInvocations.Iface {
             throw new RuntimeException(e);
         }
     }
-    
+
     private void connect() throws TException {
         conn = new TFramedTransport(new TSocket(host, port));
         client = new DistributedRPCInvocations.Client(new TBinaryProtocol(conn));
         conn.open();
     }
-    
+
     public String getHost() {
         return host;
     }
-    
+
     public int getPort() {
         return port;
-    }       
+    }
 
-    public void result(String id, String result) throws TException {
+    public void result(String id, byte[] result) throws TException {
         try {
             if(client==null) connect();
             client.result(id, result);
@@ -56,7 +56,7 @@ public class DRPCInvocationsClient implements DistributedRPCInvocations.Iface {
             client = null;
             throw e;
         }
-    }    
+    }
 
     public void failRequest(String id) throws TException {
         try {
