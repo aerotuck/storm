@@ -16,6 +16,14 @@ except:
 
 
 class Iface:
+  def executeBinary(self, functionName, funcArgs):
+    """
+    Parameters:
+     - functionName
+     - funcArgs
+    """
+    pass
+
   def execute(self, functionName, funcArgs):
     """
     Parameters:
@@ -31,6 +39,40 @@ class Client(Iface):
     if oprot is not None:
       self._oprot = oprot
     self._seqid = 0
+
+  def executeBinary(self, functionName, funcArgs):
+    """
+    Parameters:
+     - functionName
+     - funcArgs
+    """
+    self.send_executeBinary(functionName, funcArgs)
+    return self.recv_executeBinary()
+
+  def send_executeBinary(self, functionName, funcArgs):
+    self._oprot.writeMessageBegin('executeBinary', TMessageType.CALL, self._seqid)
+    args = executeBinary_args()
+    args.functionName = functionName
+    args.funcArgs = funcArgs
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_executeBinary(self, ):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = executeBinary_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.e is not None:
+      raise result.e
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "executeBinary failed: unknown result");
 
   def execute(self, functionName, funcArgs):
     """
@@ -71,6 +113,7 @@ class Processor(Iface, TProcessor):
   def __init__(self, handler):
     self._handler = handler
     self._processMap = {}
+    self._processMap["executeBinary"] = Processor.process_executeBinary
     self._processMap["execute"] = Processor.process_execute
 
   def process(self, iprot, oprot):
@@ -88,6 +131,20 @@ class Processor(Iface, TProcessor):
       self._processMap[name](self, seqid, iprot, oprot)
     return True
 
+  def process_executeBinary(self, seqid, iprot, oprot):
+    args = executeBinary_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = executeBinary_result()
+    try:
+      result.success = self._handler.executeBinary(args.functionName, args.funcArgs)
+    except DRPCExecutionException, e:
+      result.e = e
+    oprot.writeMessageBegin("executeBinary", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
   def process_execute(self, seqid, iprot, oprot):
     args = execute_args()
     args.read(iprot)
@@ -104,6 +161,150 @@ class Processor(Iface, TProcessor):
 
 
 # HELPER FUNCTIONS AND STRUCTURES
+
+class executeBinary_args:
+  """
+  Attributes:
+   - functionName
+   - funcArgs
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'functionName', None, None, ), # 1
+    (2, TType.STRING, 'funcArgs', None, None, ), # 2
+  )
+
+  def __init__(self, functionName=None, funcArgs=None,):
+    self.functionName = functionName
+    self.funcArgs = funcArgs
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.functionName = iprot.readString().decode('utf-8')
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.funcArgs = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('executeBinary_args')
+    if self.functionName is not None:
+      oprot.writeFieldBegin('functionName', TType.STRING, 1)
+      oprot.writeString(self.functionName.encode('utf-8'))
+      oprot.writeFieldEnd()
+    if self.funcArgs is not None:
+      oprot.writeFieldBegin('funcArgs', TType.STRING, 2)
+      oprot.writeString(self.funcArgs)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class executeBinary_result:
+  """
+  Attributes:
+   - success
+   - e
+  """
+
+  thrift_spec = (
+    (0, TType.STRING, 'success', None, None, ), # 0
+    (1, TType.STRUCT, 'e', (DRPCExecutionException, DRPCExecutionException.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, success=None, e=None,):
+    self.success = success
+    self.e = e
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.STRING:
+          self.success = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.e = DRPCExecutionException()
+          self.e.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('executeBinary_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.STRING, 0)
+      oprot.writeString(self.success)
+      oprot.writeFieldEnd()
+    if self.e is not None:
+      oprot.writeFieldBegin('e', TType.STRUCT, 1)
+      self.e.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
 
 class execute_args:
   """

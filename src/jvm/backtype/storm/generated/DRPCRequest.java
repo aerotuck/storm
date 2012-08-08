@@ -27,7 +27,7 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
   private static final org.apache.thrift7.protocol.TField FUNC_ARGS_FIELD_DESC = new org.apache.thrift7.protocol.TField("func_args", org.apache.thrift7.protocol.TType.STRING, (short)1);
   private static final org.apache.thrift7.protocol.TField REQUEST_ID_FIELD_DESC = new org.apache.thrift7.protocol.TField("request_id", org.apache.thrift7.protocol.TType.STRING, (short)2);
 
-  private String func_args; // required
+  private ByteBuffer func_args; // required
   private String request_id; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
@@ -97,7 +97,7 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
   static {
     Map<_Fields, org.apache.thrift7.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift7.meta_data.FieldMetaData>(_Fields.class);
     tmpMap.put(_Fields.FUNC_ARGS, new org.apache.thrift7.meta_data.FieldMetaData("func_args", org.apache.thrift7.TFieldRequirementType.REQUIRED, 
-        new org.apache.thrift7.meta_data.FieldValueMetaData(org.apache.thrift7.protocol.TType.STRING)));
+        new org.apache.thrift7.meta_data.FieldValueMetaData(org.apache.thrift7.protocol.TType.STRING        , true)));
     tmpMap.put(_Fields.REQUEST_ID, new org.apache.thrift7.meta_data.FieldMetaData("request_id", org.apache.thrift7.TFieldRequirementType.REQUIRED, 
         new org.apache.thrift7.meta_data.FieldValueMetaData(org.apache.thrift7.protocol.TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
@@ -108,7 +108,7 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
   }
 
   public DRPCRequest(
-    String func_args,
+    ByteBuffer func_args,
     String request_id)
   {
     this();
@@ -121,7 +121,8 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
    */
   public DRPCRequest(DRPCRequest other) {
     if (other.is_set_func_args()) {
-      this.func_args = other.func_args;
+      this.func_args = org.apache.thrift7.TBaseHelper.copyBinary(other.func_args);
+;
     }
     if (other.is_set_request_id()) {
       this.request_id = other.request_id;
@@ -138,11 +139,20 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
     this.request_id = null;
   }
 
-  public String get_func_args() {
-    return this.func_args;
+  public byte[] get_func_args() {
+    set_func_args(org.apache.thrift7.TBaseHelper.rightSize(func_args));
+    return func_args == null ? null : func_args.array();
   }
 
-  public void set_func_args(String func_args) {
+  public ByteBuffer buffer_for_func_args() {
+    return func_args;
+  }
+
+  public void set_func_args(byte[] func_args) {
+    set_func_args(func_args == null ? (ByteBuffer)null : ByteBuffer.wrap(func_args));
+  }
+
+  public void set_func_args(ByteBuffer func_args) {
     this.func_args = func_args;
   }
 
@@ -190,7 +200,7 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
       if (value == null) {
         unset_func_args();
       } else {
-        set_func_args((String)value);
+        set_func_args((ByteBuffer)value);
       }
       break;
 
@@ -330,7 +340,7 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
       switch (field.id) {
         case 1: // FUNC_ARGS
           if (field.type == org.apache.thrift7.protocol.TType.STRING) {
-            this.func_args = iprot.readString();
+            this.func_args = iprot.readBinary();
           } else { 
             org.apache.thrift7.protocol.TProtocolUtil.skip(iprot, field.type);
           }
@@ -357,7 +367,7 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
     oprot.writeStructBegin(STRUCT_DESC);
     if (this.func_args != null) {
       oprot.writeFieldBegin(FUNC_ARGS_FIELD_DESC);
-      oprot.writeString(this.func_args);
+      oprot.writeBinary(this.func_args);
       oprot.writeFieldEnd();
     }
     if (this.request_id != null) {
@@ -378,7 +388,7 @@ public class DRPCRequest implements org.apache.thrift7.TBase<DRPCRequest, DRPCRe
     if (this.func_args == null) {
       sb.append("null");
     } else {
-      sb.append(this.func_args);
+      org.apache.thrift7.TBaseHelper.toString(this.func_args, sb);
     }
     first = false;
     if (!first) sb.append(", ");

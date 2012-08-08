@@ -2906,7 +2906,7 @@ class DRPCRequest:
         break
       if fid == 1:
         if ftype == TType.STRING:
-          self.func_args = iprot.readString().decode('utf-8')
+          self.func_args = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -2926,7 +2926,7 @@ class DRPCRequest:
     oprot.writeStructBegin('DRPCRequest')
     if self.func_args is not None:
       oprot.writeFieldBegin('func_args', TType.STRING, 1)
-      oprot.writeString(self.func_args.encode('utf-8'))
+      oprot.writeString(self.func_args)
       oprot.writeFieldEnd()
     if self.request_id is not None:
       oprot.writeFieldBegin('request_id', TType.STRING, 2)
